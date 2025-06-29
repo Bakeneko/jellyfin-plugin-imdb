@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>IMDb</title>
+</head>
+
+<body>
+    <div id="configurationPage" data-role="page" class="page type-interior pluginConfigurationPage" data-require="emby-input,emby-button,emby-checkbox">
+        <div data-role="content">
+            <div class="content-primary">
+                <h1>IMDb</h1>
+                <form id="configurationForm">
+                    <label class="inputContainer">
+                        <input is="emby-input" type="text" id="apiBaseUrl" />
+                        <span>Base url of your <a target="_blank" href="https://github.com/bakeneko/imdb-api">imdb-api</a>.</span>
+                    </label>
+                    <label class="inputContainer">
+                        <input is="emby-input" type="password" id="apiKey" />
+                        <span>Api key of your <a target="_blank" href="https://github.com/bakeneko/imdb-api">imdb-api</a>.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="usePlot" />
+                        <span>Use plot.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="useEpisodePlot" />
+                        <span>Use episode plot.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="useYear" />
+                        <span>Use production year.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="useGenres" />
+                        <span>Use genres.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="useKeywords" />
+                        <span>Use keywords.</span>
+                    </label>
+                    <label class="checkboxContainer">
+                        <input is="emby-checkbox" type="checkbox" id="useRating" />
+                        <span>Use rating.</span>
+                    </label>
+                    <div>
+                        <button is="emby-button" type="submit" class="raised button-submit block emby-button">
+                            <span>Save</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <script type="text/javascript">
+            var PluginConfig = {
+                pluginUniqueId: '71751258-fe6d-461a-b5b9-39332be3b0a8',
+                apiBaseUrl: document.getElementById("apiBaseUrl"),
+                apiKey: document.getElementById("apiKey"),
+                usePlot: document.getElementById("usePlot"),
+                useEpisodePlot: document.getElementById("useEpisodePlot"),
+                useYear: document.getElementById("useYear"),
+                useGenres: document.getElementById("useGenres"),
+                useKeywords: document.getElementById("useKeywords"),
+                useRating: document.getElementById("useRating"),
+            };
+
+            document.querySelector('#configurationPage')
+                .addEventListener('pageshow', function () {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(PluginConfig.pluginUniqueId).then(function (config) {
+                        PluginConfig.apiBaseUrl.value = config.ApiBaseUrl;
+                        PluginConfig.apiKey.value = config.ApiKey;
+                        PluginConfig.usePlot.checked = config.UsePlot;
+                        PluginConfig.useEpisodePlot.checked = config.UseEpisodePlot;
+                        PluginConfig.useYear.checked = config.UseYear;
+                        PluginConfig.useGenres.checked = config.UseGenres;
+                        PluginConfig.useKeywords.checked = config.UseKeywords;
+                        PluginConfig.useRating.checked = config.UseRating;
+                        Dashboard.hideLoadingMsg();
+                    });
+                });
+
+            document.querySelector('#configurationForm')
+                .addEventListener('submit', function (e) {
+                    Dashboard.showLoadingMsg();
+                    ApiClient.getPluginConfiguration(PluginConfig.pluginUniqueId).then(function (config) {
+                        config.ApiBaseUrl = PluginConfig.apiBaseUrl.value;
+                        config.ApiKey = PluginConfig.apiKey.value;
+                        config.UsePlot = PluginConfig.usePlot.checked;
+                        config.UseEpisodePlot = PluginConfig.useEpisodePlot.checked;
+                        config.UseYear = PluginConfig.useYear.checked;
+                        config.UseGenres = PluginConfig.useGenres.checked;
+                        config.UseKeywords = PluginConfig.useKeywords.checked;
+                        config.UseRating = PluginConfig.useRating.checked;
+                        ApiClient.updatePluginConfiguration(PluginConfig.pluginUniqueId, config).then(function (result) {
+                            Dashboard.processPluginConfigurationUpdateResult(result);
+                        });
+                    });
+
+                    e.preventDefault();
+                    return false;
+                });
+        </script>
+    </div>
+</body>
+
+</html>

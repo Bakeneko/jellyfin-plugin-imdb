@@ -1,0 +1,15 @@
+---
+name: "IMDb"
+guid: "71751258-fe6d-461a-b5b9-39332be3b0a8"
+version: 1
+targetAbi: "10.10.0.0"
+framework: "net8.0"
+owner: "bakeneko"
+overview: "Get IMDb metadata"
+description: >
+  Get metadata for movies and other video content from IMDb.
+category: "Metadata"
+artifacts:
+  - "Jellyfin.Plugin.IMDb.dll"
+changelog: |-
+  - First release @bakeneko
