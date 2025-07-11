@@ -1,1 +1,20 @@
-[]
+[
+    {
+        "guid": "71751258-fe6d-461a-b5b9-39332be3b0a8",
+        "name": "IMDb",
+        "description": "Get metadata for movies and other video content from IMDb.\n",
+        "overview": "Get IMDb metadata",
+        "owner": "bakeneko",
+        "category": "Metadata",
+        "versions": [
+            {
+                "version": "1.0.0.0",
+                "changelog": "- First release @bakeneko",
+                "targetAbi": "10.10.0.0",
+                "sourceUrl": "https://github.com/Bakeneko/jellyfin-plugin-imdb/releases/download/v1/imdb_1.0.0.0.zip",
+                "checksum": "26d525a427b076c6c1336c8d7af335f2",
+                "timestamp": "2025-07-11T17:37:07Z"
+            }
+        ]
+    }
+]
