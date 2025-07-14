@@ -78,6 +78,12 @@ namespace Jellyfin.Plugin.IMDb
                 item.ProductionYear = result.year;
             }
 
+            if (!string.IsNullOrEmpty(result.release)
+                && DateTime.TryParse(result.release, CultureInfo.InvariantCulture, DateTimeStyles.AllowWhiteSpaces, out var release))
+            {
+                item.PremiereDate = release;
+            }
+
             if (Plugin.Instance.Configuration.UseRating && result.rating >= 0)
             {
                 item.CommunityRating = result.rating;
@@ -118,14 +124,42 @@ namespace Jellyfin.Plugin.IMDb
                 throw new ArgumentNullException(nameof(seriesImdbId));
             }
 
-            if (string.IsNullOrWhiteSpace(episodeImdbId))
-            {
-                throw new ArgumentNullException(nameof(episodeImdbId));
-            }
-
             var item = itemResult.Item;
 
-            var result = await GetRootObject(episodeImdbId, language, cancellationToken).ConfigureAwait(false);
+            var seriesResult = await GetRootObject(seriesImdbId, language, cancellationToken).ConfigureAwait(false);
+
+            if (seriesResult?.episodes is null)
+            {
+                return false;
+            }
+
+            EpisodeRootObject result = null;
+
+            // Search by imdb id if available
+            if (!string.IsNullOrWhiteSpace(episodeImdbId))
+            {
+                foreach (var episode in seriesResult.episodes)
+                {
+                    if (string.Equals(episodeImdbId, episode.imdbId, StringComparison.OrdinalIgnoreCase))
+                    {
+                        result = episode;
+                        break;
+                    }
+                }
+            }
+
+            // finally, search by numbers
+            if (result is null)
+            {
+                foreach (var episode in seriesResult.episodes)
+                {
+                    if (episode.season == seasonNumber && episode.number == episodeNumber)
+                    {
+                        result = episode;
+                        break;
+                    }
+                }
+            }
 
             if (result is null)
             {
@@ -138,21 +172,11 @@ namespace Jellyfin.Plugin.IMDb
             }
 
             item.Name = result.title;
-            item.OriginalTitle = result.originalTitle;
+            item.OriginalTitle = result.title;
 
             if (Plugin.Instance.Configuration.UseRating && result.rating >= 0)
             {
                 item.CommunityRating = result.rating;
-            }
-
-            if (Plugin.Instance.Configuration.UseGenres)
-            {
-                item.Genres = result.genres;
-            }
-
-            if (Plugin.Instance.Configuration.UseKeywords)
-            {
-                item.Tags = result.keywords;
             }
 
             if (Plugin.Instance.Configuration.UseEpisodePlot)
@@ -203,6 +227,7 @@ namespace Jellyfin.Plugin.IMDb
             var apiKey = Plugin.Instance.Configuration.ApiKey;
             var urlQuery = new StringBuilder("&language=")
                 .Append(language);
+            urlQuery.Append("&episodes=true");
 
             var url = string.Format(
                     CultureInfo.InvariantCulture,
@@ -242,7 +267,7 @@ namespace Jellyfin.Plugin.IMDb
 
             public string synopsis { get; set; }
 
-            public float rating { get; set; }
+            public float? rating { get; set; }
 
             public string[] genres { get; set; }
 
@@ -253,6 +278,37 @@ namespace Jellyfin.Plugin.IMDb
             public int? runtime { get; set; }
 
             public int year { get; set; }
+
+            public string release { get; set; }
+
+            public int? seasons { get; set; }
+
+            public EpisodeRootObject[] episodes { get; set; }
+        }
+
+        internal sealed class EpisodeRootObject
+        {
+            public string imdbId { get; set; }
+
+            public string seriesImdbId { get; set; }
+
+            public string title { get; set; }
+
+            public string seriesTitle { get; set; }
+
+            public int season { get; set; }
+
+            public int number { get; set; }
+
+            public string synopsis { get; set; }
+
+            public float? rating { get; set; }
+
+            public string posterUrl { get; set; }
+
+            public string release { get; set; }
+
+            public int? year { get; set; }
         }
     }
 }
